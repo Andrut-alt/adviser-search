@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Онбординг профілю</title>
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Завершіть профіль</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label for="id_role">Роль</label>
+      {{ form.role }}
+    </div>
+
+    <div id="student_fields">
+      <div>
+        <label for="id_group_code">Група</label>
+        {{ form.group_code }}
+      </div>
+      <div>
+        <label for="id_course">Курс</label>
+        {{ form.course }}
+      </div>
+    </div>
+
+    <div id="teacher_fields">
+      <div>
+        <label for="id_department">Кафедра</label>
+        {{ form.department }}
+      </div>
+    </div>
+
+    <div>
+      <label for="id_bio">Про себе</label>
+      {{ form.bio }}
+    </div>
+
+    <button type="submit">Зберегти</button>
+  </form>
+
+  <script>
+    const roleEl = document.getElementById('id_role');
+    const studentBox = document.getElementById('student_fields');
+    const teacherBox = document.getElementById('teacher_fields');
+
+    function toggle() {
+      const role = roleEl.value;
+      studentBox.classList.toggle('hidden', role !== 'student');
+      teacherBox.classList.toggle('hidden', role !== 'teacher');
+    }
+    roleEl.addEventListener('change', toggle);
+    toggle(); // initial
+  </script>
+</body>
+</html>
