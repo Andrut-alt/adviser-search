@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Мої слоти</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .slot-card { background: #f5f5f5; padding: 20px; margin-bottom: 15px; border-radius: 5px; }
+    .slot-available { border-left: 4px solid #28a745; }
+    .slot-filled { border-left: 4px solid #dc3545; }
+    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; margin-right: 10px; }
+    .btn:hover { background: #0056b3; }
+    .btn-success { background: #28a745; }
+    .btn-danger { background: #dc3545; }
+  </style>
+</head>
+<body>
+  <h1>Мої слоти</h1>
+  
+  <p><strong>Максимальна кількість слотів:</strong> {{ max_slots }}</p>
+  <p><strong>Поточних слотів:</strong> {{ slots.count }}</p>
+  
+  {% if can_create_slot %}
+    <a href="{% url 'searching:create_slot' %}" class="btn btn-success">Створити новий слот</a>
+  {% else %}
+    <p>Досягнуто максимальну кількість слотів.</p>
+  {% endif %}
+  
+  <h2>Список слотів</h2>
+  
+  {% if slots %}
+    {% for slot in slots %}
+      <div class="slot-card {% if slot.is_filled %}slot-filled{% else %}slot-available{% endif %}">
+        <h3>Слот #{{ slot.id }}</h3>
+        <p><strong>Статус:</strong> 
+          {% if slot.is_filled %}
+            <span style="color: #dc3545;">Зайнятий</span>
+          {% else %}
+            <span style="color: #28a745;">Вільний</span>
+          {% endif %}
+        </p>
+        {% if slot.student %}
+          <p><strong>Студент:</strong> {{ slot.student.user.first_name }} {{ slot.student.user.last_name }}</p>
+          <p><strong>Email:</strong> {{ slot.student.user.email }}</p>
+          <p><strong>Курс:</strong> {{ slot.student.get_year_of_study_display }}</p>
+          {% if slot.student.course_topic %}
+            <p><strong>Тема курсової:</strong> {{ slot.student.course_topic }}</p>
+          {% endif %}
+        {% endif %}
+        <p><strong>Створено:</strong> {{ slot.created_at|date:"d.m.Y H:i" }}</p>
+        <a href="{% url 'searching:slot_detail' slot.id %}" class="btn">Переглянути деталі</a>
+        {% if not slot.is_filled %}
+          <a href="{% url 'searching:delete_slot' slot.id %}" class="btn btn-danger" onclick="return confirm('Ви впевнені, що хочете видалити цей слот?');">Видалити</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Слотів немає. Створіть перший слот.</p>
+  {% endif %}
+
+  <p><a href="{% url 'profiles:teacher_profile' %}">Назад до профілю</a></p>
+</body>
+</html>
+

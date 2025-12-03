@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Мої запити</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: #f5f5f5; font-weight: bold; }
+    .status-badge { display: inline-block; padding: 5px 10px; border-radius: 3px; }
+    .status-pending { background: #ffc107; color: #000; }
+    .status-approved { background: #28a745; color: #fff; }
+    .status-rejected { background: #dc3545; color: #fff; }
+    .btn { display: inline-block; padding: 8px 16px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin: 2px; }
+    .btn-success { background: #28a745; }
+    .btn-danger { background: #dc3545; }
+    .btn:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h1>Мої запити</h1>
+  
+  {% if requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>Студент</th>
+          <th>Курс</th>
+          <th>Тема курсової</th>
+          <th>Статус</th>
+          <th>Дата створення</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+          <tr>
+            <td>{{ req.student.user.first_name }} {{ req.student.user.last_name }}<br>
+                <small>{{ req.student.user.email }}</small></td>
+            <td>{{ req.student.get_year_of_study_display }}</td>
+            <td>{{ req.student.course_topic|default:"Не вказано" }}</td>
+            <td>
+              <span class="status-badge status-{{ req.status }}">
+                {{ req.get_status_display }}
+              </span>
+            </td>
+            <td>{{ req.created_at|date:"d.m.Y H:i" }}</td>
+            <td>
+              {% if req.status == 'pending' %}
+                {% if not req.slot.is_filled %}
+                  <a href="{% url 'searching:approve_request' req.id %}" class="btn btn-success">Підтвердити</a>
+                  <a href="{% url 'searching:reject_request' req.id %}" class="btn btn-danger">Відхилити</a>
+                {% else %}
+                  <span>Слот зайнятий</span>
+                {% endif %}
+              {% else %}
+                <span>-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% if req.message %}
+            <tr>
+              <td colspan="6"><small><strong>Повідомлення:</strong> {{ req.message }}</small></td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Запитів немає.</p>
+  {% endif %}
+
+  <p><a href="{% url 'profiles:teacher_profile' %}">Назад до профілю</a></p>
+</body>
+</html>
+

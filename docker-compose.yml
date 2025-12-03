@@ -9,8 +9,15 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - POSTGRES_DB=kursova_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Voloshyn02
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15
@@ -21,7 +28,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5434:5434"
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

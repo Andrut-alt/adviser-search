@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Профіль викладача</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .profile-info { background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; }
+    .btn:hover { background: #0056b3; }
+    .btn-danger { background: #dc3545; }
+    .btn-danger:hover { background: #c82333; }
+    textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Профіль викладача</h1>
+  
+  <div class="profile-info">
+    <h2>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</h2>
+    <p><strong>Email:</strong> {{ teacher.user.email }}</p>
+    {% if teacher.department %}
+      <p><strong>Кафедра:</strong> {{ teacher.department.name }}</p>
+    {% endif %}
+    {% if teacher.bio %}
+      <p><strong>Про себе:</strong> {{ teacher.bio }}</p>
+    {% endif %}
+    {% if teacher.scientific_interests.all %}
+      <p><strong>Наукові інтереси:</strong>
+        {% for interest in teacher.scientific_interests.all %}
+          {{ interest.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+    <p><strong>Вільних слотів:</strong> {{ teacher.available_slots_count }} / {{ teacher.total_slots_count }}</p>
+  </div>
+
+  {% if active_request %}
+    <div class="profile-info">
+      <h3>Статус запиту</h3>
+      <p>У вас є активний запит зі статусом: <strong>{{ active_request.get_status_display }}</strong></p>
+    </div>
+  {% elif has_assigned_slot %}
+    <div class="profile-info">
+      <h3>Ви вже прикріплені до цього викладача</h3>
+    </div>
+  {% elif can_send_request and first_available_slot %}
+    <div class="profile-info">
+      <h3>Надіслати запит</h3>
+      <form method="post" action="{% url 'searching:send_request' first_available_slot.id %}">
+        {% csrf_token %}
+        <p>
+          <label for="message">Повідомлення (опціонально):</label>
+          <textarea name="message" id="message" rows="4" placeholder="Напишіть повідомлення викладачу..."></textarea>
+        </p>
+        <button type="submit" class="btn">Надіслати запит</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="profile-info">
+      <p>На жаль, вільних слотів немає.</p>
+    </div>
+  {% endif %}
+
+  <p><a href="{% url 'searching:filter_teachers' %}">Назад до пошуку</a></p>
+</body>
+</html>
+

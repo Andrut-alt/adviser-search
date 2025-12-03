@@ -1,3 +1,116 @@
 from django.db import models
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
-# Create your models here.
+
+class Slot(models.Model):
+    """Слот викладача - один слот = один студент"""
+    teacher = models.ForeignKey(
+        'profiles.TeacherProfile',
+        on_delete=models.CASCADE,
+        related_name='slots',
+        verbose_name="Викладач",
+    )
+    student = models.OneToOneField(
+        'profiles.StudentProfile',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_slot',
+        verbose_name="Студент",
+    )
+    is_available = models.BooleanField(default=True, verbose_name="Доступний")
+    is_filled = models.BooleanField(default=False, verbose_name="Зайнятий")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Створено")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
+
+    class Meta:
+        verbose_name = "Слот"
+        verbose_name_plural = "Слоти"
+        ordering = ['-created_at']
+
+    def clean(self):
+        """Валідація: якщо студент прикріплений, слот зайнятий"""
+        if self.student:
+            self.is_filled = True
+            self.is_available = False
+        else:
+            self.is_filled = False
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def is_full(self):
+        """Перевірка, чи слот зайнятий"""
+        return self.is_filled or self.student is not None
+
+    def __str__(self):
+        if self.student:
+            return f"Слот {self.teacher.user.email} - {self.student.user.email}"
+        return f"Слот {self.teacher.user.email} - вільний"
+
+
+class SlotRequest(models.Model):
+    """Запит студента на слот викладача"""
+    STATUS_CHOICES = [
+        ('pending', 'Очікує'),
+        ('approved', 'Підтверджено'),
+        ('rejected', 'Відхилено'),
+        ('cancelled', 'Скасовано'),
+    ]
+
+    student = models.ForeignKey(
+        'profiles.StudentProfile',
+        on_delete=models.CASCADE,
+        related_name='slot_requests',
+        verbose_name="Студент",
+    )
+    slot = models.ForeignKey(
+        Slot,
+        on_delete=models.CASCADE,
+        related_name='requests',
+        verbose_name="Слот",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="Статус",
+    )
+    message = models.TextField(blank=True, null=True, verbose_name="Повідомлення")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Створено")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
+
+    class Meta:
+        verbose_name = "Запит на слот"
+        verbose_name_plural = "Запити на слоти"
+        ordering = ['-created_at']
+        # Унікальність: один студент може мати лише один активний запит на один слот
+        constraints = [
+            models.UniqueConstraint(
+                fields=['student', 'slot'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_request',
+            ),
+        ]
+
+    def clean(self):
+        """Валідація: перевірка активних запитів"""
+        # Перевірка, чи студент вже має активний запит на цей слот
+        if self.status == 'pending':
+            existing = SlotRequest.objects.filter(
+                student=self.student,
+                slot=self.slot,
+                status='pending'
+            ).exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError("У вас вже є активний запит на цей слот.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Запит {self.student.user.email} -> {self.slot.teacher.user.email} ({self.get_status_display()})"

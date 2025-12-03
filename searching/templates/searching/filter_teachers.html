@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Пошук викладачів</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .filters { background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .teacher-card { background: #fff; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 5px; }
+    .teacher-card h3 { margin-top: 0; }
+    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; }
+    .btn:hover { background: #0056b3; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Пошук викладачів</h1>
+  
+  <div class="filters">
+    <h2>Фільтри</h2>
+    <form method="get">
+      <div class="form-group">
+        <label for="department">Кафедра:</label>
+        <select name="department" id="department">
+          <option value="">Всі кафедри</option>
+          {% for dept in departments %}
+            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:"s" %}selected{% endif %}>
+              {{ dept.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="interest">Науковий інтерес:</label>
+        <select name="interest" id="interest">
+          <option value="">Всі інтереси</option>
+          {% for interest in interests %}
+            <option value="{{ interest.id }}" {% if selected_interest == interest.id|stringformat:"s" %}selected{% endif %}>
+              {{ interest.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <button type="submit">Фільтрувати</button>
+      <a href="{% url 'searching:filter_teachers' %}">Скинути</a>
+    </form>
+  </div>
+
+  <h2>Результати пошуку ({{ teachers.count }})</h2>
+  
+  {% if teachers %}
+    {% for teacher in teachers %}
+      <div class="teacher-card">
+        <h3>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</h3>
+        <p><strong>Email:</strong> {{ teacher.user.email }}</p>
+        {% if teacher.department %}
+          <p><strong>Кафедра:</strong> {{ teacher.department.name }}</p>
+        {% endif %}
+        {% if teacher.bio %}
+          <p><strong>Про себе:</strong> {{ teacher.bio|truncatewords:20 }}</p>
+        {% endif %}
+        {% if teacher.scientific_interests.all %}
+          <p><strong>Наукові інтереси:</strong>
+            {% for interest in teacher.scientific_interests.all %}
+              {{ interest.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+        {% endif %}
+        <p><strong>Вільних слотів:</strong> {{ teacher.available_slots_count }}</p>
+        <a href="{% url 'searching:teacher_detail' teacher.id %}" class="btn">Переглянути профіль</a>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Викладачів не знайдено.</p>
+  {% endif %}
+
+  <p><a href="{% url 'profiles:student_profile' %}">Назад до профілю</a></p>
+</body>
+</html>
+

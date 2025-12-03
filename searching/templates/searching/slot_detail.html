@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Деталі слота</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .slot-info { background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .student-info { background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+    .request-item { background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #007bff; }
+    .status-badge { display: inline-block; padding: 5px 10px; border-radius: 3px; }
+    .status-pending { background: #ffc107; color: #000; }
+    .status-approved { background: #28a745; color: #fff; }
+    .status-rejected { background: #dc3545; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Деталі слота #{{ slot.id }}</h1>
+  
+  <div class="slot-info">
+    <h2>Інформація про слот</h2>
+    <p><strong>Статус:</strong> 
+      {% if slot.is_filled %}
+        <span style="color: #dc3545;">Зайнятий</span>
+      {% else %}
+        <span style="color: #28a745;">Вільний</span>
+      {% endif %}
+    </p>
+    <p><strong>Створено:</strong> {{ slot.created_at|date:"d.m.Y H:i" }}</p>
+  </div>
+
+  {% if slot.student %}
+    <div class="student-info">
+      <h2>Прикріплений студент</h2>
+      <p><strong>ПІБ:</strong> {{ slot.student.user.first_name }} {{ slot.student.user.last_name }}</p>
+      <p><strong>Email:</strong> {{ slot.student.user.email }}</p>
+      <p><strong>Група:</strong> {{ slot.student.group }}</p>
+      <p><strong>Курс:</strong> {{ slot.student.get_year_of_study_display }}</p>
+      {% if slot.student.course_topic %}
+        <p><strong>Тема курсової:</strong> {{ slot.student.course_topic }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <h2>Історія запитів</h2>
+  
+  {% if requests %}
+    {% for req in requests %}
+      <div class="request-item">
+        <p><strong>Студент:</strong> {{ req.student.user.first_name }} {{ req.student.user.last_name }}</p>
+        <p><strong>Статус:</strong> 
+          <span class="status-badge status-{{ req.status }}">
+            {{ req.get_status_display }}
+          </span>
+        </p>
+        <p><strong>Дата:</strong> {{ req.created_at|date:"d.m.Y H:i" }}</p>
+        {% if req.message %}
+          <p><strong>Повідомлення:</strong> {{ req.message }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Запитів немає.</p>
+  {% endif %}
+
+  <p><a href="{% url 'searching:teacher_slots' %}">Назад до слотів</a></p>
+</body>
+</html>
+

@@ -22,8 +22,6 @@ DEBUG = True
 
 
 
-
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -80,10 +78,16 @@ WSGI_APPLICATION = "mentorion.wsgi.application"
 if env("DATABASE_URL", default=""):
     DATABASES = {"default": env.db("DATABASE_URL")}
 else:
+    # Налаштування для Docker з PostgreSQL
+    # Якщо змінні середовища не встановлені, використовуємо значення за замовчуванням
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_DB", default="kursova_db"),
+            "USER": env("POSTGRES_USER", default="postgres"),
+            "PASSWORD": env("POSTGRES_PASSWORD", default="Voloshyn02"),
+            "HOST": env("POSTGRES_HOST", default="db"),
+            "PORT": env("POSTGRES_PORT", default="5432"),
         }
     }
     
@@ -101,17 +105,20 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
-LOGIN_REDIRECT_URL = "/"     # куди кидати після логіну
+# Налаштування редіректів
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True  # Дозволяємо редірект після логіну
+LOGIN_REDIRECT_URL = "/"     # Базовий редірект (буде перевизначено в адаптері)
 LOGOUT_REDIRECT_URL = "/"
+
+# Використовуємо кастомний адаптер для редіректів
+ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     "microsoft": {
-        
         "TENANT": env("MICROSOFT_TENANT_ID"),
-      
-        
-       
+        "SCOPE": ["User.Read"],
+        "AUTH_PARAMS": {"access_type": "online"},
     }
 }
 

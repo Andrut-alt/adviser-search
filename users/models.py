@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
-    username = None  # прибираємо username
+    username = None  
     email = models.EmailField(unique=True)
 
     USERNAME_FIELD = "email"
@@ -33,3 +33,29 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    @property
+    def is_student(self):
+        """Перевірка наявності StudentProfile"""
+        from profiles.models import StudentProfile
+        return StudentProfile.objects.filter(user=self).exists()
+
+    @property
+    def is_teacher(self):
+        """Перевірка наявності TeacherProfile"""
+        from profiles.models import TeacherProfile
+        return TeacherProfile.objects.filter(user=self).exists()
+
+    @property
+    def has_profile(self):
+        """Перевірка наявності будь-якого профілю"""
+        return self.is_student or self.is_teacher
+
+    @property
+    def profile_role(self):
+        """Повертає 'student', 'teacher' або None"""
+        if self.is_student:
+            return 'student'
+        elif self.is_teacher:
+            return 'teacher'
+        return None

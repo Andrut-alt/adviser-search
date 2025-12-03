@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Профіль студента</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .profile-info { background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .status-badge { display: inline-block; padding: 5px 10px; border-radius: 3px; margin: 10px 0; }
+    .status-pending { background: #ffc107; color: #000; }
+    .status-approved { background: #28a745; color: #fff; }
+    .status-rejected { background: #dc3545; color: #fff; }
+    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; }
+    .btn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>Профіль студента</h1>
+  
+  <div class="profile-info">
+    <h2>Особиста інформація</h2>
+    <p><strong>ПІБ:</strong> {{ student_profile.user.first_name }} {{ student_profile.user.last_name }}</p>
+    <p><strong>Email:</strong> {{ student_profile.user.email }}</p>
+    <p><strong>Група:</strong> {{ student_profile.group }}</p>
+    <p><strong>Курс:</strong> {{ student_profile.get_year_of_study_display }}</p>
+    {% if student_profile.specialization %}
+      <p><strong>Спеціалізація:</strong> {{ student_profile.specialization }}</p>
+    {% endif %}
+    {% if student_profile.department %}
+      <p><strong>Кафедра:</strong> {{ student_profile.department.name }}</p>
+    {% endif %}
+    {% if student_profile.course_topic %}
+      <p><strong>Тема курсової роботи:</strong> {{ student_profile.course_topic }}</p>
+    {% endif %}
+  </div>
+
+  {% if assigned_slot and teacher %}
+    <div class="profile-info">
+      <h2>Прикріплений викладач</h2>
+      <p><strong>Викладач:</strong> {{ teacher.user.first_name }} {{ teacher.user.last_name }}</p>
+      <p><strong>Email:</strong> {{ teacher.user.email }}</p>
+      {% if teacher.department %}
+        <p><strong>Кафедра:</strong> {{ teacher.department.name }}</p>
+      {% endif %}
+    </div>
+  {% elif active_request %}
+    <div class="profile-info">
+      <h2>Статус запиту</h2>
+      <span class="status-badge status-{{ active_request.status }}">
+        {{ active_request.get_status_display }}
+      </span>
+      <p>Запит надіслано до викладача: {{ active_request.slot.teacher.user.email }}</p>
+    </div>
+  {% else %}
+    <div class="profile-info">
+      <h2>Статус</h2>
+      <p>Ви ще не обрали керівника</p>
+      <a href="{% url 'searching:filter_teachers' %}" class="btn">Обрати викладача</a>
+    </div>
+  {% endif %}
+
+  <p><a href="{% url 'home' %}">На головну</a></p>
+</body>
+</html>
+
