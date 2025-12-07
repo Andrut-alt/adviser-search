@@ -75,21 +75,12 @@ WSGI_APPLICATION = "mentorion.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if env("DATABASE_URL", default=""):
-    DATABASES = {"default": env.db("DATABASE_URL")}
-else:
-    # Налаштування для Docker з PostgreSQL
-    # Якщо змінні середовища не встановлені, використовуємо значення за замовчуванням
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("POSTGRES_DB", default="kursova_db"),
-            "USER": env("POSTGRES_USER", default="postgres"),
-            "PASSWORD": env("POSTGRES_PASSWORD", default="Voloshyn02"),
-            "HOST": env("POSTGRES_HOST", default="db"),
-            "PORT": env("POSTGRES_PORT", default="5432"),
-        }
-    }
+DATABASES = {
+    "default": env.db(
+        "DATABASE_URL",
+        default="postgres://postgres:Voloshyn02@db:5432/kursova_db"
+    )
+}
 
 CSRF_TRUSTED_ORIGINS = [
     'https://' + h.strip() for h in env("ALLOWED_HOSTS", default="").split(",") if h.strip() and h.strip() != '*'
