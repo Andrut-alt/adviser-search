@@ -4,17 +4,18 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-    <h1 class="text-center">🔍 Пошук викладачів</h1>
+    <h1 class="text-center"> Пошук викладачів</h1>
     <p class="text-center text-muted mb-4">Знайдіть викладача для курсової роботи</p>
 
     <!-- Filters Card -->
     <div class="card mb-4">
         <div class="card-header">
-            <h3 class="card-title">🔎 Фільтри пошуку</h3>
+            <h3 class="card-title"> Фільтри пошуку</h3>
         </div>
         <div class="card-body">
             <form method="GET">
                 <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                    {% if not hide_department_filter %}
                     <div class="form-group" style="flex: 1; min-width: 200px;">
                         <label for="department">Кафедра</label>
                         <select name="department" id="department">
@@ -26,6 +27,7 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% endif %}
 
                     <div class="form-group" style="flex: 1; min-width: 200px;">
                         <label for="interest">Наукові інтереси</label>
@@ -95,7 +97,7 @@
             <div class="card-footer">
                 <a href="{% url 'searching:teacher_detail' teacher.id %}" class="btn btn-secondary btn-sm"
                     style="width: 100%;">
-                    👁️ Переглянути профіль
+                    Переглянути профіль
                 </a>
             </div>
         </div>

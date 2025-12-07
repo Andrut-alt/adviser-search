@@ -5,7 +5,7 @@
 {% block content %}
 <div style="margin-top: 2rem;">
   <div class="d-flex justify-between align-center mb-3">
-    <h1>📅 Мої слоти</h1>
+    <h1> Мої слоти</h1>
     {% if can_create_slot %}
     <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">➕ Створити новий слот</a>
     {% endif %}
@@ -36,7 +36,7 @@
   <div class="card mb-4">
     <div class="card-body">
       <p class="text-center text-muted mb-0">
-        ⚠️ Досягнуто максимальну кількість слотів
+        Досягнуто максимальну кількість слотів
       </p>
     </div>
   </div>
@@ -89,15 +89,15 @@
         <p class="text-muted">Слот вільний для бронювання студентами</p>
         {% endif %}
         <p class="text-muted mb-0" style="margin-top: 1rem;">
-          <small>📅 Створено: {{ slot.created_at|date:"d.m.Y H:i" }}</small>
+          <small> Створено: {{ slot.created_at|date:"d.m.Y H:i" }}</small>
         </p>
       </div>
       <div class="card-footer">
-        <a href="{% url 'searching:slot_detail' slot.id %}" class="btn btn-secondary btn-sm">👁️ Переглянути деталі</a>
+        <a href="{% url 'searching:slot_detail' slot.id %}" class="btn btn-secondary btn-sm">Переглянути деталі</a>
         {% if not slot.is_filled %}
         <a href="{% url 'searching:delete_slot' slot.id %}" class="btn btn-danger btn-sm"
           onclick="return confirm('Ви впевнені, що хочете видалити цей слот?');">
-          🗑️ Видалити
+          Видалити
         </a>
         {% endif %}
       </div>
@@ -108,10 +108,10 @@
   {% else %}
   <div class="card">
     <div class="card-body text-center" style="padding: 3rem;">
-      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">📭 Слотів немає</h3>
+      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;"> Слотів немає</h3>
       <p class="text-muted mb-3">Створіть перший слот для прийому студентів на консультації</p>
       {% if can_create_slot %}
-      <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">➕ Створити перший слот</a>
+      <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">Створити перший слот</a>
       {% endif %}
     </div>
   </div>

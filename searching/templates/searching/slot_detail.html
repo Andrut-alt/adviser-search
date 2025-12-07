@@ -4,12 +4,12 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-  <h1>📅 Деталі слота #{{ slot.id }}</h1>
+  <h1>Деталі слота #{{ slot.id }}</h1>
 
   <!-- Slot Information -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">📊 Інформація про слот</h2>
+      <h2 class="card-title"> Інформація про слот</h2>
       {% if slot.is_filled %}
       <span class="badge badge-danger">Зайнятий</span>
       {% else %}
@@ -32,7 +32,7 @@
   {% if slot.student %}
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">👨‍🎓 Прикріплений студент</h2>
+      <h2 class="card-title"> Прикріплений студент</h2>
     </div>
     <div class="card-body">
       <table style="width: 100%; border: none; box-shadow: none;">
@@ -69,7 +69,7 @@
   <!-- Request History -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">📜 Історія запитів</h2>
+      <h2 class="card-title"> Історія запитів</h2>
     </div>
     <div class="card-body">
       {% if requests %}
@@ -90,7 +90,7 @@
           </div>
           <div class="card-body" style="padding: 1rem;">
             <p class="text-muted mb-2">
-              <small>📅 {{ req.created_at|date:"d.m.Y H:i" }}</small>
+              <small>{{ req.created_at|date:"d.m.Y H:i" }}</small>
             </p>
             {% if req.message %}
             <p

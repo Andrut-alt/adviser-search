@@ -4,12 +4,12 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-  <h1>👨‍🏫 {{ teacher.user.first_name }} {{ teacher.user.last_name }}</h1>
+  <h1> {{ teacher.user.first_name }} {{ teacher.user.last_name }}</h1>
 
   <!-- Teacher Information Card -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">📋 Інформація про викладача</h2>
+      <h2 class="card-title"> Інформація про викладача</h2>
     </div>
     <div class="card-body">
       <table style="width: 100%; border: none; box-shadow: none;">
@@ -86,7 +86,7 @@
   {% elif has_assigned_slot %}
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">✅ Ви вже прикріплені</h2>
+      <h2 class="card-title">Ви вже прикріплені</h2>
     </div>
     <div class="card-body">
       <p>Ви вже прикріплені до цього викладача. Для зміни викладача зверніться до адміністрації.</p>
@@ -96,7 +96,7 @@
   {% elif can_send_request and first_available_slot %}
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">📨 Надіслати запит на консультацію</h2>
+      <h2 class="card-title"> Надіслати запит на консультацію</h2>
     </div>
     <div class="card-body">
       <form method="post" action="{% url 'searching:send_request' first_available_slot.id %}">
@@ -108,7 +108,7 @@
           <span class="form-help">Повідомлення допоможе викладачу краще зрозуміти вашу мотивацію</span>
         </div>
         <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-          ✉️ Надіслати запит
+           Надіслати запит
         </button>
       </form>
     </div>
@@ -117,7 +117,7 @@
   {% else %}
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">❌ Немає вільних слотів</h2>
+      <h2 class="card-title">Немає вільних слотів</h2>
     </div>
     <div class="card-body text-center" style="padding: 2rem;">
       <p class="text-muted">На жаль, у цього викладача зараз немає вільних місць для консультацій.</p>

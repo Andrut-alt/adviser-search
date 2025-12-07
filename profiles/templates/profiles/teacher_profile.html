@@ -5,7 +5,7 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-  <h1>👨‍🏫 Профіль викладача</h1>
+  <h1>Профіль викладача</h1>
 
   {% if not is_approved %}
   <div class="alert alert-warning"
@@ -19,7 +19,7 @@
   <!-- Personal Information Card -->
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">📋 Особиста інформація</h2>
+      <h2 class="card-title">Особиста інформація</h2>
     </div>
     <div class="card-body">
       <table style="width: 100%; border: none; box-shadow: none;">
@@ -89,7 +89,7 @@
   <div class="card-grid">
     <div class="card">
       <div class="card-body text-center">
-        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">📅 Мої слоти</h3>
+        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"> Мої слоти</h3>
         <p class="text-muted mb-3">Керування доступними слотами для консультацій</p>
         <a href="{% url 'searching:teacher_slots' %}" class="btn btn-primary">Переглянути слоти</a>
       </div>
@@ -97,7 +97,7 @@
 
     <div class="card">
       <div class="card-body text-center">
-        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">📨 Запити студентів</h3>
+        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Запити студентів</h3>
         <p class="text-muted mb-3">Перегляд та обробка запитів від студентів</p>
         <a href="{% url 'searching:teacher_requests' %}" class="btn btn-secondary">Переглянути запити</a>
       </div>
@@ -105,7 +105,7 @@
 
     <div class="card">
       <div class="card-body text-center">
-        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">🏠 Головна</h3>
+        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"> Головна</h3>
         <p class="text-muted mb-3">Повернутися на головну сторінку</p>
         <a href="{% url 'home' %}" class="btn btn-outline">На головну</a>
       </div>

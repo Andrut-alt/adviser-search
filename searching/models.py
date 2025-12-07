@@ -1,11 +1,26 @@
-from django.db import models
+"""Models for consultation slot management and student requests."""
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from django.db import models
 
 
 class Slot(models.Model):
-    """Слот викладача - один слот = один студент"""
+    """
+    Consultation slot for a teacher.
+
+    Each slot can be assigned to one student. Slots are created by teachers
+    and requested by students.
+
+    Attributes:
+        teacher: ForeignKey to TeacherProfile
+        student: OneToOne relationship with StudentProfile (nullable)
+        is_available: Whether slot is available for requests
+        is_filled: Whether slot is assigned to a student
+        created_at: Timestamp of slot creation
+        updated_at: Timestamp of last update
+    """
+
     teacher = models.ForeignKey(
         'profiles.TeacherProfile',
         on_delete=models.CASCADE,
@@ -31,7 +46,11 @@ class Slot(models.Model):
         ordering = ['-created_at']
 
     def clean(self):
-        """Валідація: якщо студент прикріплений, слот зайнятий"""
+        """
+        Validate and auto-update slot status based on student assignment.
+
+        If student is assigned, mark slot as filled and unavailable.
+        """
         if self.student:
             self.is_filled = True
             self.is_available = False
@@ -39,21 +58,39 @@ class Slot(models.Model):
             self.is_filled = False
 
     def save(self, *args, **kwargs):
+        """Save slot after validation."""
         self.clean()
         super().save(*args, **kwargs)
 
     def is_full(self):
-        """Перевірка, чи слот зайнятий"""
+        """
+        Check if slot is occupied.
+
+        Returns:
+            bool: True if slot is filled or has assigned student.
+        """
         return self.is_filled or self.student is not None
 
     def __str__(self):
+        """Return string representation of slot."""
         if self.student:
             return f"Слот {self.teacher.user.email} - {self.student.user.email}"
         return f"Слот {self.teacher.user.email} - вільний"
 
 
 class SlotRequest(models.Model):
-    """Запит студента на слот викладача"""
+    """
+    Student request for a teacher's consultation slot.
+
+    Attributes:
+        student: ForeignKey to StudentProfile
+        slot: ForeignKey to Slot
+        status: Current status (pending/approved/rejected/cancelled)
+        message: Optional message from student
+        created_at: Timestamp of request creation
+        updated_at: Timestamp of last update
+    """
+
     STATUS_CHOICES = [
         ('pending', 'Очікує'),
         ('approved', 'Підтверджено'),
@@ -87,7 +124,6 @@ class SlotRequest(models.Model):
         verbose_name = "Запит на слот"
         verbose_name_plural = "Запити на слоти"
         ordering = ['-created_at']
-        # Унікальність: один студент може мати лише один активний запит на один слот
         constraints = [
             models.UniqueConstraint(
                 fields=['student', 'slot'],
@@ -97,8 +133,12 @@ class SlotRequest(models.Model):
         ]
 
     def clean(self):
-        """Валідація: перевірка активних запитів"""
-        # Перевірка, чи студент вже має активний запит на цей слот
+        """
+        Validate that student doesn't have duplicate pending requests.
+
+        Raises:
+            ValidationError: If student already has pending request for this slot.
+        """
         if self.status == 'pending':
             existing = SlotRequest.objects.filter(
                 student=self.student,
@@ -109,8 +149,10 @@ class SlotRequest(models.Model):
                 raise ValidationError("У вас вже є активний запит на цей слот.")
 
     def save(self, *args, **kwargs):
+        """Save request after validation."""
         self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """Return string representation of request."""
         return f"Запит {self.student.user.email} -> {self.slot.teacher.user.email} ({self.get_status_display()})"

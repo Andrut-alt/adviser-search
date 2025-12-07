@@ -1,31 +1,43 @@
+"""Main URL configuration for the Mentorion project."""
+
 from django.contrib import admin
-from django.urls import path, include
-from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.urls import include, path
+
+from profiles.models import StudentProfile, TeacherProfile
+
 
 def home(request):
-    # Діагностика: перевіряємо стан користувача
-    if request.user.is_authenticated:
-        # Перевіряємо наявність профілю безпосередньо через модель
-        from profiles.models import StudentProfile, TeacherProfile
-        
-        # Перевіряємо, чи є профіль студента
-        if StudentProfile.objects.filter(user=request.user).exists():
-            return redirect('profiles:student_profile')
-        
-        # Перевіряємо, чи є профіль викладача
-        if TeacherProfile.objects.filter(user=request.user).exists():
-            return redirect('profiles:teacher_profile')
-        
-        # Якщо профілю немає, редіректимо на onboarding
-        return redirect('profiles:onboarding')
-    
-    # Якщо користувач не автентифікований - редіректимо на сторінку входу
-    return redirect('account_login')
+    """
+    Home view that redirects users based on authentication and profile status.
+
+    Redirects:
+    - Authenticated users with student profile -> student profile page
+    - Authenticated users with teacher profile -> teacher profile page
+    - Authenticated users without profile -> onboarding page
+    - Unauthenticated users -> login page
+
+    Args:
+        request: HTTP request object.
+
+    Returns:
+        HttpResponse: Redirect to appropriate page.
+    """
+    if not request.user.is_authenticated:
+        return redirect('account_login')
+
+    if StudentProfile.objects.filter(user=request.user).exists():
+        return redirect('profiles:student_profile')
+
+    if TeacherProfile.objects.filter(user=request.user).exists():
+        return redirect('profiles:teacher_profile')
+
+    return redirect('profiles:onboarding')
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("accounts/", include("allauth.urls")),  # дає /accounts/login/, /accounts/microsoft/ тощо
+    path("accounts/", include("allauth.urls")),
     path("profiles/", include("profiles.urls")),
     path("searching/", include("searching.urls")),
     path("", home, name="home"),

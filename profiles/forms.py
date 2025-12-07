@@ -1,8 +1,17 @@
+"""Form for user onboarding to create student or teacher profile."""
+
 from django import forms
+
 from .models import Department, ScientificInterest, StudentProfile, TeacherProfile
 
 
 class OnboardingForm(forms.Form):
+    """
+    Form for creating student or teacher profile during onboarding.
+
+    Dynamically validates fields based on selected role.
+    """
+
     ROLE_CHOICES = [
         ('student', 'Студент'),
         ('teacher', 'Викладач'),
@@ -10,7 +19,6 @@ class OnboardingForm(forms.Form):
 
     role = forms.ChoiceField(choices=ROLE_CHOICES, label="Ваша роль", widget=forms.RadioSelect)
 
-    # Поля для студента
     group = forms.CharField(max_length=50, required=False, label="Група")
     year_of_study = forms.IntegerField(
         required=False,
@@ -28,7 +36,6 @@ class OnboardingForm(forms.Form):
         empty_label="Оберіть кафедру"
     )
 
-    # Поля для викладача
     teacher_department = forms.ModelChoiceField(
         queryset=Department.objects.all(),
         required=False,
@@ -48,50 +55,80 @@ class OnboardingForm(forms.Form):
     )
 
     def clean(self):
+        """
+        Validate form based on selected role.
+
+        Returns:
+            dict: Cleaned form data.
+
+        Raises:
+            ValidationError: If required fields are missing for selected role.
+        """
         cleaned_data = super().clean()
         role = cleaned_data.get("role")
-        group = cleaned_data.get("group")
-        year_of_study = cleaned_data.get("year_of_study")
-        student_department = cleaned_data.get("student_department")
-        teacher_department = cleaned_data.get("teacher_department")
 
         if role == 'student':
-            if not group:
-                self.add_error("group", "Вкажіть групу")
-            if not year_of_study:
-                self.add_error("year_of_study", "Вкажіть курс")
-            elif year_of_study in [3, 4] and not student_department:
-                self.add_error("student_department", "Кафедра обов'язкова для студентів 3-4 курсу")
-
+            self._validate_student_fields(cleaned_data)
         elif role == 'teacher':
-            if not teacher_department:
-                self.add_error("teacher_department", "Оберіть кафедру")
+            self._validate_teacher_fields(cleaned_data)
 
         return cleaned_data
 
+    def _validate_student_fields(self, cleaned_data):
+        """Validate required fields for student role."""
+        if not cleaned_data.get("group"):
+            self.add_error("group", "Вкажіть групу")
+        
+        year_of_study = cleaned_data.get("year_of_study")
+        if not year_of_study:
+            self.add_error("year_of_study", "Вкажіть курс")
+        elif year_of_study in [3, 4] and not cleaned_data.get("student_department"):
+            self.add_error("student_department", "Кафедра обов'язкова для студентів 3-4 курсу")
+
+    def _validate_teacher_fields(self, cleaned_data):
+        """Validate required fields for teacher role."""
+        if not cleaned_data.get("teacher_department"):
+            self.add_error("teacher_department", "Оберіть кафедру")
+
     def save(self, user):
-        """Створює профіль відповідно до вибраної ролі"""
+        """
+        Create profile based on selected role.
+
+        Args:
+            user: User instance to associate with profile.
+
+        Returns:
+            StudentProfile or TeacherProfile: Created profile instance.
+        """
         cleaned_data = self.cleaned_data
         role = cleaned_data.get("role")
 
         if role == 'student':
-            profile = StudentProfile.objects.create(
-                user=user,
-                group=cleaned_data.get("group"),
-                year_of_study=cleaned_data.get("year_of_study"),
-                specialization=cleaned_data.get("specialization") or None,
-                course_topic=cleaned_data.get("course_topic") or None,
-                department=cleaned_data.get("student_department"),
-            )
-        elif role == 'teacher':
-            profile = TeacherProfile.objects.create(
-                user=user,
-                department=cleaned_data.get("teacher_department"),
-                bio=cleaned_data.get("bio") or None,
-            )
-            # Додаємо наукові інтереси
-            scientific_interests = cleaned_data.get("scientific_interests")
-            if scientific_interests:
-                profile.scientific_interests.set(scientific_interests)
+            return self._create_student_profile(user, cleaned_data)
+        if role == 'teacher':
+            return self._create_teacher_profile(user, cleaned_data)
+
+    def _create_student_profile(self, user, data):
+        """Create and return student profile."""
+        return StudentProfile.objects.create(
+            user=user,
+            group=data.get("group"),
+            year_of_study=data.get("year_of_study"),
+            specialization=data.get("specialization") or None,
+            course_topic=data.get("course_topic") or None,
+            department=data.get("student_department"),
+        )
+
+    def _create_teacher_profile(self, user, data):
+        """Create and return teacher profile with scientific interests."""
+        profile = TeacherProfile.objects.create(
+            user=user,
+            department=data.get("teacher_department"),
+            bio=data.get("bio") or None,
+        )
+
+        scientific_interests = data.get("scientific_interests")
+        if scientific_interests:
+            profile.scientific_interests.set(scientific_interests)
 
         return profile

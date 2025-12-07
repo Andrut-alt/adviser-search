@@ -4,7 +4,7 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-  <h1>📨 Запити від студентів</h1>
+  <h1> Запити від студентів</h1>
   <p class="text-muted mb-4">Перегляд та обробка запитів на консультації</p>
 
   {% if requests %}
@@ -55,7 +55,7 @@
         {% if req.message %}
         <tr style="background: var(--color-background);">
           <td colspan="6" style="padding: 1rem;">
-            <strong>💬 Повідомлення:</strong> {{ req.message }}
+            <strong>Повідомлення:</strong> {{ req.message }}
           </td>
         </tr>
         {% endif %}
@@ -67,7 +67,7 @@
   {% else %}
   <div class="card">
     <div class="card-body text-center" style="padding: 3rem;">
-      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">📭 Запитів немає</h3>
+      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">Запитів немає</h3>
       <p class="text-muted">Коли студенти надішлють запити на консультації, вони з'являться тут</p>
     </div>
   </div>
