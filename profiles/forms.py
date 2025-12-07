@@ -23,9 +23,9 @@ class OnboardingForm(forms.Form):
     year_of_study = forms.IntegerField(
         required=False,
         min_value=1,
-        max_value=6,
+        max_value=4,
         label="Курс",
-        widget=forms.NumberInput(attrs={'min': 1, 'max': 6})
+        widget=forms.NumberInput(attrs={'min': 1, 'max': 4})
     )
     specialization = forms.CharField(max_length=255, required=False, label="Спеціалізація")
     course_topic = forms.CharField(max_length=500, required=False, label="Тема курсової роботи")
