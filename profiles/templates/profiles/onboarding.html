@@ -1,143 +1,148 @@
-{% load static %}
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Онбординг профілю</title>
-  <style>
-    .hidden { display: none; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input[type="text"], input[type="number"], select, textarea {
-      width: 100%;
-      max-width: 400px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .error { color: red; font-size: 0.9em; }
-    ul { list-style: none; padding: 0; }
-    ul li { margin: 5px 0; }
-  </style>
-</head>
-<body>
-  <h1>Завершіть профіль</h1>
-  
-  {% if form.errors %}
-    <div class="error">
-      <ul>
+{% extends "base.html" %}
+
+{% block title %}Завершіть профіль - Mentorion{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="card-title text-center">✨ Завершіть налаштування профілю</h1>
+    </div>
+    <div class="card-body">
+      <p class="text-center mb-4">Будь ласка, надайте додаткову інформацію для завершення реєстрації</p>
+
+      {% if form.errors %}
+      <ul class="messages">
         {% for error in form.non_field_errors %}
-          <li>{{ error }}</li>
+        <li class="message error">{{ error }}</li>
         {% endfor %}
       </ul>
-    </div>
-  {% endif %}
-  
-  <form method="post">
-    {% csrf_token %}
-    
-    <div class="form-group">
-      <label>Роль *</label>
-      {{ form.role }}
-      {% if form.role.errors %}
-        <div class="error">{{ form.role.errors }}</div>
       {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label>Оберіть вашу роль *</label>
+          {{ form.role }}
+          {% if form.role.errors %}
+          <span class="error-message">{{ form.role.errors }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Student Fields -->
+        <div id="student_fields" class="d-none">
+          <div class="divider"></div>
+          <h2 style="margin-bottom: 1.5rem;">👨‍🎓 Інформація для студента</h2>
+
+          <div class="form-group">
+            <label for="id_group">Група *</label>
+            {{ form.group }}
+            {% if form.group.errors %}
+            <span class="error-message">{{ form.group.errors }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_year_of_study">Курс *</label>
+            {{ form.year_of_study }}
+            {% if form.year_of_study.errors %}
+            <span class="error-message">{{ form.year_of_study.errors }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_specialization">Спеціалізація</label>
+            {{ form.specialization }}
+            {% if form.specialization.errors %}
+            <span class="error-message">{{ form.specialization.errors }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_course_topic">Тема курсової роботи</label>
+            {{ form.course_topic }}
+            {% if form.course_topic.errors %}
+            <span class="error-message">{{ form.course_topic.errors }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_student_department">Кафедра (обов'язково для 3-4 курсу)</label>
+            {{ form.student_department }}
+            {% if form.student_department.errors %}
+            <span class="error-message">{{ form.student_department.errors }}</span>
+            {% endif %}
+            <span class="form-help">Оберіть кафедру, якщо ви на 3-му або 4-му курсі</span>
+          </div>
+        </div>
+
+        <!-- Teacher Fields -->
+        <div id="teacher_fields" class="d-none">
+          <div class="divider"></div>
+          <h2 style="margin-bottom: 1.5rem;">👨‍🏫 Інформація для викладача</h2>
+
+          <div class="form-group">
+            <label for="id_teacher_department">Кафедра *</label>
+            {{ form.teacher_department }}
+            {% if form.teacher_department.errors %}
+            <span class="error-message">{{ form.teacher_department.errors }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label>Наукові інтереси</label>
+            {{ form.scientific_interests }}
+            {% if form.scientific_interests.errors %}
+            <span class="error-message">{{ form.scientific_interests.errors }}</span>
+            {% endif %}
+            <span class="form-help">Оберіть декілька областей, якщо потрібно</span>
+          </div>
+
+          <div class="form-group">
+            <label for="id_bio">Про себе</label>
+            {{ form.bio }}
+            {% if form.bio.errors %}
+            <span class="error-message">{{ form.bio.errors }}</span>
+            {% endif %}
+            <span class="form-help">Розкажіть коротко про свій досвід та інтереси</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+          ✅ Зберегти та продовжити
+        </button>
+      </form>
     </div>
+  </div>
+</div>
 
-    <div id="student_fields" class="hidden">
-      <h2>Інформація для студента</h2>
-      
-      <div class="form-group">
-        <label for="id_group">Група *</label>
-        {{ form.group }}
-        {% if form.group.errors %}
-          <div class="error">{{ form.group.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label for="id_year_of_study">Курс *</label>
-        {{ form.year_of_study }}
-        {% if form.year_of_study.errors %}
-          <div class="error">{{ form.year_of_study.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label for="id_specialization">Спеціалізація</label>
-        {{ form.specialization }}
-        {% if form.specialization.errors %}
-          <div class="error">{{ form.specialization.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label for="id_course_topic">Тема курсової роботи</label>
-        {{ form.course_topic }}
-        {% if form.course_topic.errors %}
-          <div class="error">{{ form.course_topic.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label for="id_student_department">Кафедра (обов'язково для 3-4 курсу)</label>
-        {{ form.student_department }}
-        {% if form.student_department.errors %}
-          <div class="error">{{ form.student_department.errors }}</div>
-        {% endif %}
-      </div>
-    </div>
+<style>
+  .d-none {
+    display: none;
+  }
+</style>
 
-    <div id="teacher_fields" class="hidden">
-      <h2>Інформація для викладача</h2>
-      
-      <div class="form-group">
-        <label for="id_teacher_department">Кафедра *</label>
-        {{ form.teacher_department }}
-        {% if form.teacher_department.errors %}
-          <div class="error">{{ form.teacher_department.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label>Наукові інтереси</label>
-        {{ form.scientific_interests }}
-        {% if form.scientific_interests.errors %}
-          <div class="error">{{ form.scientific_interests.errors }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="form-group">
-        <label for="id_bio">Про себе</label>
-        {{ form.bio }}
-        {% if form.bio.errors %}
-          <div class="error">{{ form.bio.errors }}</div>
-        {% endif %}
-      </div>
-    </div>
+<script>
+  const roleInputs = document.querySelectorAll('input[name="role"]');
+  const studentBox = document.getElementById('student_fields');
+  const teacherBox = document.getElementById('teacher_fields');
 
-    <button type="submit">Зберегти</button>
-  </form>
-
-  <script>
-    const roleInputs = document.querySelectorAll('input[name="role"]');
-    const studentBox = document.getElementById('student_fields');
-    const teacherBox = document.getElementById('teacher_fields');
-
-    function toggle() {
-      const selectedRole = document.querySelector('input[name="role"]:checked');
-      if (selectedRole) {
-        const role = selectedRole.value;
-        studentBox.classList.toggle('hidden', role !== 'student');
-        teacherBox.classList.toggle('hidden', role !== 'teacher');
-      }
+  function toggle() {
+    const selectedRole = document.querySelector('input[name="role"]:checked');
+    if (selectedRole) {
+      const role = selectedRole.value;
+      studentBox.classList.toggle('d-none', role !== 'student');
+      teacherBox.classList.toggle('d-none', role !== 'teacher');
     }
-    
-    roleInputs.forEach(input => {
-      input.addEventListener('change', toggle);
-    });
-    
-    toggle(); // initial
-  </script>
-</body>
-</html>
+  }
+
+  roleInputs.forEach(input => {
+    input.addEventListener('change', toggle);
+  });
+
+  toggle(); // Initialize on page load
+</script>
+{% endblock %}

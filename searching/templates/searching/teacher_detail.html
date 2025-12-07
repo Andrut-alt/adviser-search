@@ -1,68 +1,136 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Профіль викладача</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .profile-info { background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; }
-    .btn:hover { background: #0056b3; }
-    .btn-danger { background: #dc3545; }
-    .btn-danger:hover { background: #c82333; }
-    textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-  </style>
-</head>
-<body>
-  <h1>Профіль викладача</h1>
-  
-  <div class="profile-info">
-    <h2>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</h2>
-    <p><strong>Email:</strong> {{ teacher.user.email }}</p>
-    {% if teacher.department %}
-      <p><strong>Кафедра:</strong> {{ teacher.department.name }}</p>
-    {% endif %}
-    {% if teacher.bio %}
-      <p><strong>Про себе:</strong> {{ teacher.bio }}</p>
-    {% endif %}
-    {% if teacher.scientific_interests.all %}
-      <p><strong>Наукові інтереси:</strong>
-        {% for interest in teacher.scientific_interests.all %}
-          {{ interest.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </p>
-    {% endif %}
-    <p><strong>Вільних слотів:</strong> {{ teacher.available_slots_count }} / {{ teacher.total_slots_count }}</p>
+{% extends "base.html" %}
+
+{% block title %}{{ teacher.user.first_name }} {{ teacher.user.last_name }} - Профіль викладача{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem;">
+  <h1>👨‍🏫 {{ teacher.user.first_name }} {{ teacher.user.last_name }}</h1>
+
+  <!-- Teacher Information Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📋 Інформація про викладача</h2>
+    </div>
+    <div class="card-body">
+      <table style="width: 100%; border: none; box-shadow: none;">
+        <tbody>
+          <tr style="background: none;">
+            <td style="border: none; font-weight: 600; width: 30%;">Email:</td>
+            <td style="border: none;"><a href="mailto:{{ teacher.user.email }}">{{ teacher.user.email }}</a></td>
+          </tr>
+          {% if teacher.department %}
+          <tr style="background: none;">
+            <td style="border: none; font-weight: 600;">Кафедра:</td>
+            <td style="border: none;">{{ teacher.department.name }}</td>
+          </tr>
+          {% endif %}
+          {% if teacher.bio %}
+          <tr style="background: none;">
+            <td style="border: none; font-weight: 600;">Про себе:</td>
+            <td style="border: none;">{{ teacher.bio }}</td>
+          </tr>
+          {% endif %}
+          {% if teacher.scientific_interests.all %}
+          <tr style="background: none;">
+            <td style="border: none; font-weight: 600;">Наукові інтереси:</td>
+            <td style="border: none;">
+              {% for interest in teacher.scientific_interests.all %}
+              <span class="badge badge-primary">{{ interest.name }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+          {% endif %}
+          <tr style="background: none;">
+            <td style="border: none; font-weight: 600;">Доступність:</td>
+            <td style="border: none;">
+              <strong>{{ teacher.available_slots_count }}</strong> з <strong>{{ teacher.total_slots_count }}</strong>
+              слотів вільно
+              {% if teacher.available_slots_count > 0 %}
+              <span class="badge badge-success">Доступний</span>
+              {% else %}
+              <span class="badge badge-warning">Немає вільних місць</span>
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- Request Status or Form -->
   {% if active_request %}
-    <div class="profile-info">
-      <h3>Статус запиту</h3>
-      <p>У вас є активний запит зі статусом: <strong>{{ active_request.get_status_display }}</strong></p>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">⏳ Статус запиту</h2>
+      {% if active_request.status == 'pending' %}
+      <span class="badge badge-warning">{{ active_request.get_status_display }}</span>
+      {% elif active_request.status == 'approved' %}
+      <span class="badge badge-success">{{ active_request.get_status_display }}</span>
+      {% elif active_request.status == 'rejected' %}
+      <span class="badge badge-danger">{{ active_request.get_status_display }}</span>
+      {% endif %}
     </div>
+    <div class="card-body">
+      <p>
+        {% if active_request.status == 'pending' %}
+        Ваш запит очікує на розгляд викладачем
+        {% elif active_request.status == 'approved' %}
+        Вітаємо! Викладач підтвердив ваш запит
+        {% elif active_request.status == 'rejected' %}
+        На жаль, ваш запит було відхилено
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
   {% elif has_assigned_slot %}
-    <div class="profile-info">
-      <h3>Ви вже прикріплені до цього викладача</h3>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">✅ Ви вже прикріплені</h2>
     </div>
+    <div class="card-body">
+      <p>Ви вже прикріплені до цього викладача. Для зміни викладача зверніться до адміністрації.</p>
+    </div>
+  </div>
+
   {% elif can_send_request and first_available_slot %}
-    <div class="profile-info">
-      <h3>Надіслати запит</h3>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📨 Надіслати запит на консультацію</h2>
+    </div>
+    <div class="card-body">
       <form method="post" action="{% url 'searching:send_request' first_available_slot.id %}">
         {% csrf_token %}
-        <p>
-          <label for="message">Повідомлення (опціонально):</label>
-          <textarea name="message" id="message" rows="4" placeholder="Напишіть повідомлення викладачу..."></textarea>
-        </p>
-        <button type="submit" class="btn">Надіслати запит</button>
+        <div class="form-group">
+          <label for="message">Повідомлення викладачу (опціонально)</label>
+          <textarea name="message" id="message" rows="4"
+            placeholder="Розкажіть коротко про тему вашої роботи та чому обрали цього викладача..."></textarea>
+          <span class="form-help">Повідомлення допоможе викладачу краще зрозуміти вашу мотивацію</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+          ✉️ Надіслати запит
+        </button>
       </form>
     </div>
+  </div>
+
   {% else %}
-    <div class="profile-info">
-      <p>На жаль, вільних слотів немає.</p>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">❌ Немає вільних слотів</h2>
     </div>
+    <div class="card-body text-center" style="padding: 2rem;">
+      <p class="text-muted">На жаль, у цього викладача зараз немає вільних місць для консультацій.</p>
+      <a href="{% url 'searching:filter_teachers' %}" class="btn btn-secondary mt-3">
+        Переглянути інших викладачів
+      </a>
+    </div>
+  </div>
   {% endif %}
 
-  <p><a href="{% url 'searching:filter_teachers' %}">Назад до пошуку</a></p>
-</body>
-</html>
-
+  <!-- Back Button -->
+  <div style="margin-top: 2rem;">
+    <a href="{% url 'searching:filter_teachers' %}" class="btn btn-outline">← Назад до пошуку</a>
+  </div>
+</div>
+{% endblock %}

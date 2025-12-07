@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Вихід - Mentorion{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title text-center">Вихід з системи</h1>
+        </div>
+        <div class="card-body text-center">
+            <p class="mb-3">Ви впевнені, що хочете вийти з системи?</p>
+            <form method="post" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-lg">Так, вийти</button>
+                <a href="/" class="btn btn-outline btn-lg">Скасувати</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

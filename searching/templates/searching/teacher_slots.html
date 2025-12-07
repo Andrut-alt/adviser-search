@@ -1,64 +1,125 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Мої слоти</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .slot-card { background: #f5f5f5; padding: 20px; margin-bottom: 15px; border-radius: 5px; }
-    .slot-available { border-left: 4px solid #28a745; }
-    .slot-filled { border-left: 4px solid #dc3545; }
-    .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 10px; margin-right: 10px; }
-    .btn:hover { background: #0056b3; }
-    .btn-success { background: #28a745; }
-    .btn-danger { background: #dc3545; }
-  </style>
-</head>
-<body>
-  <h1>Мої слоти</h1>
-  
-  <p><strong>Максимальна кількість слотів:</strong> {{ max_slots }}</p>
-  <p><strong>Поточних слотів:</strong> {{ slots.count }}</p>
-  
-  {% if can_create_slot %}
-    <a href="{% url 'searching:create_slot' %}" class="btn btn-success">Створити новий слот</a>
-  {% else %}
-    <p>Досягнуто максимальну кількість слотів.</p>
+{% extends "base.html" %}
+
+{% block title %}Мої слоти - Mentorion{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem;">
+  <div class="d-flex justify-between align-center mb-3">
+    <h1>📅 Мої слоти</h1>
+    {% if can_create_slot %}
+    <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">➕ Створити новий слот</a>
+    {% endif %}
+  </div>
+
+  <!-- Statistics -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex gap-3" style="justify-content: space-around; text-align: center;">
+        <div>
+          <div style="font-size: 2rem; font-weight: bold; color: var(--color-primary);">{{ slots.count }}</div>
+          <div class="text-muted">Поточних слотів</div>
+        </div>
+        <div>
+          <div style="font-size: 2rem; font-weight: bold; color: var(--color-secondary);">{{ max_slots }}</div>
+          <div class="text-muted">Максимум слотів</div>
+        </div>
+        <div>
+          <div style="font-size: 2rem; font-weight: bold; color: var(--color-success);">
+            {{ remaining_slots }}</div>
+          <div class="text-muted">Можна створити</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if not can_create_slot %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <p class="text-center text-muted mb-0">
+        ⚠️ Досягнуто максимальну кількість слотів
+      </p>
+    </div>
+  </div>
   {% endif %}
-  
-  <h2>Список слотів</h2>
-  
+
+  <!-- Slots List -->
+  <h2 class="mb-3">Список слотів</h2>
+
   {% if slots %}
+  <div style="display: flex; flex-direction: column; gap: 1rem;">
     {% for slot in slots %}
-      <div class="slot-card {% if slot.is_filled %}slot-filled{% else %}slot-available{% endif %}">
-        <h3>Слот #{{ slot.id }}</h3>
-        <p><strong>Статус:</strong> 
+    <div class="card"
+      style="border-left: 4px solid {% if slot.is_filled %}var(--color-error){% else %}var(--color-success){% endif %};">
+      <div class="card-header">
+        <div class="d-flex justify-between align-center">
+          <h3 class="card-title" style="margin: 0;">Слот #{{ slot.id }}</h3>
           {% if slot.is_filled %}
-            <span style="color: #dc3545;">Зайнятий</span>
+          <span class="badge badge-danger">Зайнятий</span>
           {% else %}
-            <span style="color: #28a745;">Вільний</span>
+          <span class="badge badge-success">Вільний</span>
           {% endif %}
-        </p>
+        </div>
+      </div>
+      <div class="card-body">
         {% if slot.student %}
-          <p><strong>Студент:</strong> {{ slot.student.user.first_name }} {{ slot.student.user.last_name }}</p>
-          <p><strong>Email:</strong> {{ slot.student.user.email }}</p>
-          <p><strong>Курс:</strong> {{ slot.student.get_year_of_study_display }}</p>
-          {% if slot.student.course_topic %}
-            <p><strong>Тема курсової:</strong> {{ slot.student.course_topic }}</p>
-          {% endif %}
+        <table style="width: 100%; border: none; box-shadow: none;">
+          <tbody>
+            <tr style="background: none;">
+              <td style="border: none; font-weight: 600; width: 25%;">Студент:</td>
+              <td style="border: none;">{{ slot.student.user.first_name }} {{ slot.student.user.last_name }}</td>
+            </tr>
+            <tr style="background: none;">
+              <td style="border: none; font-weight: 600;">Email:</td>
+              <td style="border: none;"><a href="mailto:{{ slot.student.user.email }}">{{ slot.student.user.email }}</a>
+              </td>
+            </tr>
+            <tr style="background: none;">
+              <td style="border: none; font-weight: 600;">Курс:</td>
+              <td style="border: none;">{{ slot.student.get_year_of_study_display }}</td>
+            </tr>
+            {% if slot.student.course_topic %}
+            <tr style="background: none;">
+              <td style="border: none; font-weight: 600;">Тема курсової:</td>
+              <td style="border: none;">{{ slot.student.course_topic }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Слот вільний для бронювання студентами</p>
         {% endif %}
-        <p><strong>Створено:</strong> {{ slot.created_at|date:"d.m.Y H:i" }}</p>
-        <a href="{% url 'searching:slot_detail' slot.id %}" class="btn">Переглянути деталі</a>
+        <p class="text-muted mb-0" style="margin-top: 1rem;">
+          <small>📅 Створено: {{ slot.created_at|date:"d.m.Y H:i" }}</small>
+        </p>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'searching:slot_detail' slot.id %}" class="btn btn-secondary btn-sm">👁️ Переглянути деталі</a>
         {% if not slot.is_filled %}
-          <a href="{% url 'searching:delete_slot' slot.id %}" class="btn btn-danger" onclick="return confirm('Ви впевнені, що хочете видалити цей слот?');">Видалити</a>
+        <a href="{% url 'searching:delete_slot' slot.id %}" class="btn btn-danger btn-sm"
+          onclick="return confirm('Ви впевнені, що хочете видалити цей слот?');">
+          🗑️ Видалити
+        </a>
         {% endif %}
       </div>
+    </div>
     {% endfor %}
+  </div>
+
   {% else %}
-    <p>Слотів немає. Створіть перший слот.</p>
+  <div class="card">
+    <div class="card-body text-center" style="padding: 3rem;">
+      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">📭 Слотів немає</h3>
+      <p class="text-muted mb-3">Створіть перший слот для прийому студентів на консультації</p>
+      {% if can_create_slot %}
+      <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">➕ Створити перший слот</a>
+      {% endif %}
+    </div>
+  </div>
   {% endif %}
 
-  <p><a href="{% url 'profiles:teacher_profile' %}">Назад до профілю</a></p>
-</body>
-</html>
-
+  <!-- Back Button -->
+  <div style="margin-top: 2rem;">
+    <a href="{% url 'profiles:teacher_profile' %}" class="btn btn-outline">← Назад до профілю</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,17 +1,21 @@
 {% extends "base.html" %}
-{% load socialaccount %}
+{% load i18n %}
 
-{% block title %}Увійти - Mentorion{% endblock %}
+
+
+{% block title %}Реєстрація - Mentorion{% endblock %}
 
 {% block content %}
 <div class="container-narrow" style="margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
     <div class="card">
         <div class="card-header">
-            <h1 class="card-title text-center">Вхід до системи</h1>
+            <h1 class="card-title text-center">Реєстрація недоступна</h1>
         </div>
         <div class="card-body text-center">
-            <p class="mb-3">Використовуйте ваш університетський акаунт Microsoft для входу</p>
-            <a href="{% provider_login_url 'microsoft' %}" class="btn btn-primary btn-lg">
+            <p class="mb-3">Реєстрація через email та пароль вимкнена.</p>
+            <p class="mb-4">Будь ласка, використовуйте ваш університетський акаунт Microsoft для входу в систему.</p>
+
+            <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg">
                 🔐 Увійти через Microsoft
             </a>
         </div>

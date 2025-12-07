@@ -44,6 +44,40 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         return adapter._get_redirect_url(request)
     
     def pre_social_login(self, request, sociallogin):
-        """Викликається перед соціальним логіном"""
-        pass
-
+        """Автоматично зв'язуємо існуючий акаунт з Microsoft OAuth та перевіряємо домен"""
+        # Отримуємо email з Microsoft
+        try:
+            email = sociallogin.account.extra_data.get('email')
+            if not email:
+                return
+            
+            # ВАЖЛИВО: Перевіряємо домен email
+            if not email.lower().endswith('@lnu.edu.ua'):
+                from allauth.exceptions import ImmediateHttpResponse
+                from django.shortcuts import render
+                
+                # Блокуємо вхід з не-університетською поштою
+                response = render(request, 'socialaccount/authentication_error.html', {
+                    'error': f'Дозволені тільки email адреси з доменом @lnu.edu.ua. Ваш email: {email}'
+                })
+                raise ImmediateHttpResponse(response)
+            
+            # Якщо користувач вже увійшов, нічого не робимо
+            if sociallogin.is_existing:
+                return
+            
+            # Шукаємо користувача з таким email
+            from users.models import User
+            try:
+                user = User.objects.get(email=email)
+                # Зв'язуємо існуючого користувача з Microsoft акаунтом
+                sociallogin.connect(request, user)
+            except User.DoesNotExist:
+                # Користувача не існує, продовжуємо звичайну реєстрацію
+                pass
+        except ImmediateHttpResponse:
+            # Пробрасываем исключение дальше
+            raise
+        except Exception:
+            # Якщо щось пішло не так, продовжуємо звичайну реєстрацію
+            pass

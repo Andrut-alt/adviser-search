@@ -1,27 +1,14 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>Мої запити</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background-color: #f5f5f5; font-weight: bold; }
-    .status-badge { display: inline-block; padding: 5px 10px; border-radius: 3px; }
-    .status-pending { background: #ffc107; color: #000; }
-    .status-approved { background: #28a745; color: #fff; }
-    .status-rejected { background: #dc3545; color: #fff; }
-    .btn { display: inline-block; padding: 8px 16px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; margin: 2px; }
-    .btn-success { background: #28a745; }
-    .btn-danger { background: #dc3545; }
-    .btn:hover { opacity: 0.8; }
-  </style>
-</head>
-<body>
-  <h1>Мої запити</h1>
-  
+{% extends "base.html" %}
+
+{% block title %}Запити від студентів - Mentorion{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem;">
+  <h1>📨 Запити від студентів</h1>
+  <p class="text-muted mb-4">Перегляд та обробка запитів на консультації</p>
+
   {% if requests %}
+  <div class="table-responsive">
     <table>
       <thead>
         <tr>
@@ -35,43 +22,60 @@
       </thead>
       <tbody>
         {% for req in requests %}
-          <tr>
-            <td>{{ req.student.user.first_name }} {{ req.student.user.last_name }}<br>
-                <small>{{ req.student.user.email }}</small></td>
-            <td>{{ req.student.get_year_of_study_display }}</td>
-            <td>{{ req.student.course_topic|default:"Не вказано" }}</td>
-            <td>
-              <span class="status-badge status-{{ req.status }}">
-                {{ req.get_status_display }}
-              </span>
-            </td>
-            <td>{{ req.created_at|date:"d.m.Y H:i" }}</td>
-            <td>
-              {% if req.status == 'pending' %}
-                {% if not req.slot.is_filled %}
-                  <a href="{% url 'searching:approve_request' req.id %}" class="btn btn-success">Підтвердити</a>
-                  <a href="{% url 'searching:reject_request' req.id %}" class="btn btn-danger">Відхилити</a>
-                {% else %}
-                  <span>Слот зайнятий</span>
-                {% endif %}
-              {% else %}
-                <span>-</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% if req.message %}
-            <tr>
-              <td colspan="6"><small><strong>Повідомлення:</strong> {{ req.message }}</small></td>
-            </tr>
-          {% endif %}
+        <tr>
+          <td>
+            <strong>{{ req.student.user.first_name }} {{ req.student.user.last_name }}</strong><br>
+            <small class="text-muted">{{ req.student.user.email }}</small>
+          </td>
+          <td>{{ req.student.get_year_of_study_display }}</td>
+          <td>{{ req.student.course_topic|default:"Не вказано" }}</td>
+          <td>
+            {% if req.status == 'pending' %}
+            <span class="badge badge-warning">{{ req.get_status_display }}</span>
+            {% elif req.status == 'approved' %}
+            <span class="badge badge-success">{{ req.get_status_display }}</span>
+            {% elif req.status == 'rejected' %}
+            <span class="badge badge-danger">{{ req.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ req.created_at|date:"d.m.Y H:i" }}</td>
+          <td>
+            {% if req.status == 'pending' %}
+            {% if not req.slot.is_filled %}
+            <a href="{% url 'searching:approve_request' req.id %}" class="btn btn-success btn-sm">✅ Підтвердити</a>
+            <a href="{% url 'searching:reject_request' req.id %}" class="btn btn-danger btn-sm">❌ Відхилити</a>
+            {% else %}
+            <span class="badge">Слот зайнятий</span>
+            {% endif %}
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% if req.message %}
+        <tr style="background: var(--color-background);">
+          <td colspan="6" style="padding: 1rem;">
+            <strong>💬 Повідомлення:</strong> {{ req.message }}
+          </td>
+        </tr>
+        {% endif %}
         {% endfor %}
       </tbody>
     </table>
+  </div>
+
   {% else %}
-    <p>Запитів немає.</p>
+  <div class="card">
+    <div class="card-body text-center" style="padding: 3rem;">
+      <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;">📭 Запитів немає</h3>
+      <p class="text-muted">Коли студенти надішлють запити на консультації, вони з'являться тут</p>
+    </div>
+  </div>
   {% endif %}
 
-  <p><a href="{% url 'profiles:teacher_profile' %}">Назад до профілю</a></p>
-</body>
-</html>
-
+  <!-- Back Button -->
+  <div style="margin-top: 2rem;">
+    <a href="{% url 'profiles:teacher_profile' %}" class="btn btn-outline">← Назад до профілю</a>
+  </div>
+</div>
+{% endblock %}

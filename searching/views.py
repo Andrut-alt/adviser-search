@@ -210,6 +210,7 @@ def teacher_slots_view(request):
         'slots': slots,
         'max_slots': teacher_profile.max_slots,
         'can_create_slot': slots.count() < teacher_profile.max_slots,
+        'remaining_slots': teacher_profile.max_slots - slots.count(),
     }
     return render(request, 'searching/teacher_slots.html', context)
 

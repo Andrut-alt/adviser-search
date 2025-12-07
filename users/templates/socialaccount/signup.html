@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Завершення реєстрації - Mentorion{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title text-center">Завершення реєстрації</h1>
+        </div>
+        <div class="card-body text-center">
+            <p class="mb-4">Ви використовуєте обліковий запис Microsoft для входу.</p>
+            <p class="mb-4">Після підтвердження ви перейдете до налаштування профілю.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div
+                    style="background-color: #fee; border: 1px solid #fcc; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                    <p style="margin: 0; color: #c00;"><strong>Помилка:</strong></p>
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                {% if form.email %}
+                <div style="margin-bottom: 1.5rem; text-align: left;">
+                    <label for="id_email"
+                        style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email:</label>
+                    {{ form.email }}
+                </div>
+                {% endif %}
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary btn-lg">Продовжити</button>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline btn-lg">Скасувати</a>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center text-muted">
+            <small>Безпечна реєстрація через Microsoft Azure AD</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

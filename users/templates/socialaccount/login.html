@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Вхід через Microsoft - Mentorion{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title text-center">Вхід через Microsoft</h1>
+        </div>
+        <div class="card-body text-center">
+            <p class="mb-3">Ви збираєтесь увійти, використовуючи обліковий запис Microsoft.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg">Продовжити</button>
+                <a href="{% url 'account_login' %}" class="btn btn-outline btn-lg">Скасувати</a>
+            </form>
+        </div>
+        <div class="card-footer text-center text-muted">
+            <small>Безпечний вхід через Microsoft Azure AD</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

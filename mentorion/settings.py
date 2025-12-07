@@ -101,9 +101,13 @@ SITE_ID = 2
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = True  # Обов'язково для AUTHENTICATION_METHOD = email
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+# Вимикаємо стандартну реєстрацію - тільки через Microsoft
+SOCIALACCOUNT_ONLY = True
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Автоматична реєстрація без додаткових форм
 
 # Налаштування редіректів
 ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True  # Дозволяємо редірект після логіну
@@ -157,6 +161,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = ["./static"]  # Вказуємо на d:\adviser-search\static
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

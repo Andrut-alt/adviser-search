@@ -28,5 +28,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),  # дає /accounts/login/, /accounts/microsoft/ тощо
     path("profiles/", include("profiles.urls")),
     path("searching/", include("searching.urls")),
+    path("dev-login/", lambda request: __import__('users.views', fromlist=['dev_login']).dev_login(request), name="dev_login"),  # Тільки для розробки!
     path("", home, name="home"),
 ]
