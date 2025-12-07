@@ -8,3 +8,4 @@ django-environ==0.8.1
 django-allauth
 requests
 dj-database-url
+whitenoise
