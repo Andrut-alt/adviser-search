@@ -1,10 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Профіль викладача - {{ teacher_profile.user.first_name }} {{ teacher_profile.user.last_name }}{%endblock %}
+{% block title %}Профіль викладача - {{ teacher_profile.user.first_name }} {{ teacher_profile.user.last_name
+}}{%endblock %}
 
 {% block content %}
 <div style="margin-top: 2rem;">
   <h1>👨‍🏫 Профіль викладача</h1>
+
+  {% if not is_approved %}
+  <div class="alert alert-warning"
+    style="margin-top: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+    <strong>⏳ Очікує підтвердження</strong>
+    <p style="margin: 0.5rem 0 0 0;">Ваш профіль викладача очікує підтвердження адміністратором. Після підтвердження ви
+      зможете створювати слоти та приймати запити від студентів.</p>
+  </div>
+  {% endif %}
 
   <!-- Personal Information Card -->
   <div class="card">

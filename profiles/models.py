@@ -96,6 +96,18 @@ class TeacherProfile(models.Model):
     )
     bio = models.TextField(blank=True, null=True, verbose_name="Про себе")
     max_slots = models.IntegerField(default=4, verbose_name="Максимальна кількість слотів")
+    
+    # Поля для апруву викладача
+    is_approved = models.BooleanField(default=False, verbose_name="Підтверджено")
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_teachers",
+        verbose_name="Підтверджено користувачем"
+    )
+    approved_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата підтвердження")
 
     def available_slots_count(self):
         """Кількість вільних слотів"""

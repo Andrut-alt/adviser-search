@@ -70,6 +70,7 @@ def teacher_profile_view(request):
         'total_slots': teacher_profile.total_slots_count(),
         'available_slots': teacher_profile.available_slots_count(),
         'filled_slots': teacher_profile.filled_slots_count(),
+        'is_approved': teacher_profile.is_approved,
     }
     return render(request, 'profiles/teacher_profile.html', context)
 

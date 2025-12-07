@@ -12,7 +12,8 @@ from .models import Slot, SlotRequest
 def filter_teachers_view(request):
     """Список викладачів з фільтрацією"""
     student_profile = request.user.student_profile
-    teachers = TeacherProfile.objects.all()
+    # Тільки підтверджені викладачі
+    teachers = TeacherProfile.objects.filter(is_approved=True)
     
     # Фільтрація за кафедрою
     department_id = request.GET.get('department')

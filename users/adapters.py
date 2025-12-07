@@ -44,40 +44,41 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         return adapter._get_redirect_url(request)
     
     def pre_social_login(self, request, sociallogin):
-        """Автоматично зв'язуємо існуючий акаунт з Microsoft OAuth та перевіряємо домен"""
+        """Автоматично зв'язуємо існуючий акаунт з Microsoft OAuth"""
+        # Якщо це вже зв'язаний social account, пропускаємо
+        if sociallogin.is_existing:
+            return
+        
         # Отримуємо email з Microsoft
+        email = sociallogin.account.extra_data.get('email')
+        if not email:
+            return
+        
+        # Перевіряємо домен email
+        if not email.lower().endswith('@lnu.edu.ua'):
+            from allauth.exceptions import ImmediateHttpResponse
+            from django.shortcuts import render
+            
+            response = render(request, 'socialaccount/authentication_error.html', {
+                'error': f'Дозволені тільки email адреси з доменом @lnu.edu.ua. Ваш email: {email}'
+            })
+            raise ImmediateHttpResponse(response)
+        
+        # Шукаємо користувача з таким email
+        from users.models import User
+        from allauth.account.models import EmailAddress
+        
         try:
-            email = sociallogin.account.extra_data.get('email')
-            if not email:
-                return
+            user = User.objects.get(email__iexact=email)
             
-            # ВАЖЛИВО: Перевіряємо домен email
-            if not email.lower().endswith('@lnu.edu.ua'):
-                from allauth.exceptions import ImmediateHttpResponse
-                from django.shortcuts import render
-                
-                # Блокуємо вхід з не-університетською поштою
-                response = render(request, 'socialaccount/authentication_error.html', {
-                    'error': f'Дозволені тільки email адреси з доменом @lnu.edu.ua. Ваш email: {email}'
-                })
-                raise ImmediateHttpResponse(response)
+            sociallogin.user = user
+            sociallogin.save(request)
             
-            # Якщо користувач вже увійшов, нічого не робимо
-            if sociallogin.is_existing:
-                return
-            
-            # Шукаємо користувача з таким email
-            from users.models import User
-            try:
-                user = User.objects.get(email=email)
-                # Зв'язуємо існуючого користувача з Microsoft акаунтом
-                sociallogin.connect(request, user)
-            except User.DoesNotExist:
-                # Користувача не існує, продовжуємо звичайну реєстрацію
-                pass
-        except ImmediateHttpResponse:
-            # Пробрасываем исключение дальше
-            raise
-        except Exception:
-            # Якщо щось пішло не так, продовжуємо звичайну реєстрацію
+           
+            EmailAddress.objects.get_or_create(
+                user=user,
+                email=email.lower(),
+                defaults={'verified': True, 'primary': True}
+            )
+        except User.DoesNotExist:
             pass

@@ -24,11 +24,12 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(TeacherProfile)
 class TeacherProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'department', 'max_slots', 'total_slots_display', 'available_slots_display')
-    list_filter = ('department',)
+    list_display = ('user', 'department', 'is_approved', 'max_slots', 'total_slots_display', 'available_slots_display')
+    list_filter = ('department', 'is_approved')
     search_fields = ('user__email', 'user__first_name', 'user__last_name')
-    readonly_fields = ('user',)
+    readonly_fields = ('user', 'approved_by', 'approved_at')
     filter_horizontal = ('scientific_interests',)
+    actions = ['approve_teachers']
     
     def total_slots_display(self, obj):
         return obj.total_slots_count()
@@ -37,3 +38,19 @@ class TeacherProfileAdmin(admin.ModelAdmin):
     def available_slots_display(self, obj):
         return obj.available_slots_count()
     available_slots_display.short_description = 'Вільних слотів'
+    
+    def approve_teachers(self, request, queryset):
+        """Дія для апруву викладачів"""
+        from django.utils import timezone
+        
+        updated = 0
+        for teacher in queryset.filter(is_approved=False):
+            teacher.is_approved = True
+            teacher.approved_by = request.user
+            teacher.approved_at = timezone.now()
+            teacher.save()
+            updated += 1
+        
+        self.message_user(request, f'Підтверджено {updated} викладачів.')
+    approve_teachers.short_description = 'Підтвердити обраних викладачів'
+
