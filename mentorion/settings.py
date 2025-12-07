@@ -95,7 +95,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 AUTH_USER_MODEL = "users.User"
 
-SITE_ID = 2
+SITE_ID = 1
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
@@ -117,7 +117,13 @@ ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
-    "microsoft": {
+   "microsoft": {
+       
+        "APP": {
+            "client_id": env("MICROSOFT_CLIENT_ID"),
+            "secret": env("MICROSOFT_CLIENT_SECRET"),
+            "key": ""
+        },
         "TENANT": env("MICROSOFT_TENANT_ID"),
         "SCOPE": ["User.Read"],
         "AUTH_PARAMS": {"access_type": "online"},
