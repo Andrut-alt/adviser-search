@@ -90,7 +90,14 @@ else:
             "PORT": env("POSTGRES_PORT", default="5432"),
         }
     }
-    
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://' + h.strip() for h in env("ALLOWED_HOSTS", default="").split(",") if h.strip() and h.strip() != '*'
+]
+
+if env("RENDER_EXTERNAL_HOSTNAME", default=None):
+    CSRF_TRUSTED_ORIGINS.append(f'https://{env("RENDER_EXTERNAL_HOSTNAME")}')
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
