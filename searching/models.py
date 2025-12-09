@@ -37,6 +37,7 @@ class Slot(models.Model):
     )
     is_available = models.BooleanField(default=True, verbose_name="Доступний")
     is_filled = models.BooleanField(default=False, verbose_name="Зайнятий")
+    topic = models.CharField(max_length=500, blank=True, null=True, verbose_name="Тема курсової")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Створено")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
 

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Редагування теми курсової слота #{{ slot.id }}{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem;">
+  <h1>Редагування теми курсової слота #{{ slot.id }}</h1>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"> Встановити тему курсової</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="topic">Тема курсової</label>
+          <textarea name="topic" id="topic" class="form-control" rows="4" placeholder="Введіть тему курсової (необов'язково)">{{ slot.topic }}</textarea>
+          <small class="text-muted">Залиште порожнім, щоб не встановлювати тему</small>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+          <button type="submit" class="btn btn-primary">Зберегти</button>
+          <a href="{% url 'searching:slot_detail' slot.id %}" class="btn btn-outline">Скасувати</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div style="margin-top: 2rem;">
+    <a href="{% url 'searching:teacher_slots' %}" class="btn btn-outline">← Назад до слотів</a>
+  </div>
+</div>
+{% endblock %}

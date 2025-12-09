@@ -103,6 +103,8 @@ def send_slot_request_view(request, slot_id):
     """
     Send a request for a consultation slot.
 
+    Accepts slot_id from URL or form parameter.
+
     Validates:
     - Slot is available and not filled
     - Student has no active requests
@@ -110,11 +112,15 @@ def send_slot_request_view(request, slot_id):
 
     Args:
         request: HTTP request object.
-        slot_id: ID of the slot to request.
+        slot_id: ID of the slot to request (from URL or form).
 
     Returns:
         HttpResponse: Redirect to student profile or teacher detail.
     """
+    # Try to get slot_id from POST form if provided, otherwise use URL parameter
+    if request.method == 'POST':
+        slot_id = request.POST.get('slot_id', slot_id)
+
     slot = get_object_or_404(Slot, id=slot_id)
     student_profile = request.user.student_profile
 
@@ -251,7 +257,7 @@ def reject_request_view(request, request_id):
 @teacher_required
 def teacher_slots_view(request):
     """
-    Display all slots for the teacher with creation capability.
+    Display all slots for the teacher.
 
     Args:
         request: HTTP request object.
@@ -265,61 +271,14 @@ def teacher_slots_view(request):
     context = {
         'slots': slots,
         'max_slots': teacher_profile.max_slots,
-        'can_create_slot': slots.count() < teacher_profile.max_slots,
-        'remaining_slots': teacher_profile.max_slots - slots.count(),
     }
     return render(request, 'searching/teacher_slots.html', context)
 
 
-@login_required
-@teacher_required
-def create_slot_view(request):
-    """
-    Create a new consultation slot for the teacher.
-
-    Args:
-        request: HTTP request object.
-
-    Returns:
-        HttpResponse: Redirect to teacher slots page.
-    """
-    teacher_profile = request.user.teacher_profile
-
-    if teacher_profile.slots.count() >= teacher_profile.max_slots:
-        messages.error(request, "Досягнуто максимальну кількість слотів.")
-        return redirect('searching:teacher_slots')
-
-    Slot.objects.create(teacher=teacher_profile)
-    messages.success(request, "Слот успішно створено!")
-    return redirect('searching:teacher_slots')
 
 
-@login_required
-@teacher_required
-def delete_slot_view(request, slot_id):
-    """
-    Delete an unfilled consultation slot.
 
-    Args:
-        request: HTTP request object.
-        slot_id: ID of the slot to delete.
 
-    Returns:
-        HttpResponse: Redirect to teacher slots page.
-    """
-    slot = get_object_or_404(Slot, id=slot_id)
-
-    if slot.teacher != request.user.teacher_profile:
-        messages.error(request, "Ви не маєте доступу до цього слота.")
-        return redirect('searching:teacher_slots')
-
-    if slot.is_filled:
-        messages.error(request, "Неможливо видалити зайнятий слот.")
-        return redirect('searching:teacher_slots')
-
-    slot.delete()
-    messages.success(request, "Слот успішно видалено!")
-    return redirect('searching:teacher_slots')
 
 
 @login_required
@@ -348,3 +307,37 @@ def slot_detail_view(request, slot_id):
         'requests': requests,
     }
     return render(request, 'searching/slot_detail.html', context)
+
+
+@login_required
+@teacher_required
+def edit_slot_view(request, slot_id):
+    """
+    Edit slot topic if it's not filled.
+
+    Args:
+        request: HTTP request object.
+        slot_id: ID of the slot to edit.
+
+    Returns:
+        HttpResponse: Redirect to slot detail or render edit form.
+    """
+    slot = get_object_or_404(Slot, id=slot_id)
+
+    if slot.teacher != request.user.teacher_profile:
+        messages.error(request, "Ви не маєте доступу до цього слота.")
+        return redirect('searching:teacher_slots')
+
+    if slot.is_filled:
+        messages.error(request, "Неможливо редагувати зайнятий слот.")
+        return redirect('searching:slot_detail', slot_id=slot_id)
+
+    if request.method == 'POST':
+        topic = request.POST.get('topic', '').strip()
+        slot.topic = topic if topic else None
+        slot.save()
+        messages.success(request, "Тема курсової успішно оновлена!")
+        return redirect('searching:slot_detail', slot_id=slot_id)
+
+    context = {'slot': slot}
+    return render(request, 'searching/edit_slot.html', context)

@@ -4,12 +4,7 @@
 
 {% block content %}
 <div style="margin-top: 2rem;">
-  <div class="d-flex justify-between align-center mb-3">
-    <h1> Мої слоти</h1>
-    {% if can_create_slot %}
-    <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">➕ Створити новий слот</a>
-    {% endif %}
-  </div>
+  <h1> Мої слоти</h1>
 
   <!-- Statistics -->
   <div class="card mb-4">
@@ -19,28 +14,9 @@
           <div style="font-size: 2rem; font-weight: bold; color: var(--color-primary);">{{ slots.count }}</div>
           <div class="text-muted">Поточних слотів</div>
         </div>
-        <div>
-          <div style="font-size: 2rem; font-weight: bold; color: var(--color-secondary);">{{ max_slots }}</div>
-          <div class="text-muted">Максимум слотів</div>
-        </div>
-        <div>
-          <div style="font-size: 2rem; font-weight: bold; color: var(--color-success);">
-            {{ remaining_slots }}</div>
-          <div class="text-muted">Можна створити</div>
-        </div>
       </div>
     </div>
   </div>
-
-  {% if not can_create_slot %}
-  <div class="card mb-4">
-    <div class="card-body">
-      <p class="text-center text-muted mb-0">
-        Досягнуто максимальну кількість слотів
-      </p>
-    </div>
-  </div>
-  {% endif %}
 
   <!-- Slots List -->
   <h2 class="mb-3">Список слотів</h2>
@@ -94,12 +70,6 @@
       </div>
       <div class="card-footer">
         <a href="{% url 'searching:slot_detail' slot.id %}" class="btn btn-secondary btn-sm">Переглянути деталі</a>
-        {% if not slot.is_filled %}
-        <a href="{% url 'searching:delete_slot' slot.id %}" class="btn btn-danger btn-sm"
-          onclick="return confirm('Ви впевнені, що хочете видалити цей слот?');">
-          Видалити
-        </a>
-        {% endif %}
       </div>
     </div>
     {% endfor %}
@@ -109,10 +79,7 @@
   <div class="card">
     <div class="card-body text-center" style="padding: 3rem;">
       <h3 style="color: var(--color-text-secondary); margin-bottom: 1rem;"> Слотів немає</h3>
-      <p class="text-muted mb-3">Створіть перший слот для прийому студентів на консультації</p>
-      {% if can_create_slot %}
-      <a href="{% url 'searching:create_slot' %}" class="btn btn-primary">Створити перший слот</a>
-      {% endif %}
+      <p class="text-muted mb-3">Слоти буде створено адміністратором</p>
     </div>
   </div>
   {% endif %}

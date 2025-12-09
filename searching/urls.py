@@ -11,8 +11,7 @@ urlpatterns = [
     path('request/<int:request_id>/approve/', views.approve_request_view, name='approve_request'),
     path('request/<int:request_id>/reject/', views.reject_request_view, name='reject_request'),
     path('teacher/slots/', views.teacher_slots_view, name='teacher_slots'),
-    path('teacher/slots/create/', views.create_slot_view, name='create_slot'),
-    path('teacher/slots/<int:slot_id>/delete/', views.delete_slot_view, name='delete_slot'),
     path('teacher/slots/<int:slot_id>/', views.slot_detail_view, name='slot_detail'),
+    path('teacher/slots/<int:slot_id>/edit/', views.edit_slot_view, name='edit_slot'),
 ]
 

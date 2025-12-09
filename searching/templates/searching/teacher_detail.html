@@ -57,6 +57,39 @@
     </div>
   </div>
 
+  <!-- Available Slots (topics hidden from students) -->
+  {% if first_available_slot %}
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📋 Доступні слоти</h2>
+    </div>
+    <div class="card-body">
+      {% if available_slots %}
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for slot in available_slots %}
+        <div class="card" style="margin: 0; border-left: 3px solid var(--color-success);">
+          <div class="card-body">
+            <div class="d-flex justify-between align-center" style="margin-bottom: 0.5rem;">
+              <strong>Слот #{{ slot.id }}</strong>
+              <span class="badge badge-success">Вільний</span>
+            </div>
+            {% if slot.topic %}
+            <p><strong>Тема курсової:</strong> {{ slot.topic }}</p>
+            {% else %}
+            <p class="text-muted" style="margin: 0.5rem 0;"><em>Тему курсової ще не вказано. Узгоджуйте тему при зустрічі.</em></p>
+            {% endif %}
+            <p class="text-muted mb-0" style="font-size: 0.85rem; margin-top: 0.5rem;">
+              <small>Створено: {{ slot.created_at|date:"d.m.Y H:i" }}</small>
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Request Status or Form -->
   {% if active_request %}
   <div class="card">
@@ -93,22 +126,33 @@
     </div>
   </div>
 
-  {% elif can_send_request and first_available_slot %}
+  {% elif can_send_request and available_slots %}
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title"> Надіслати запит на консультацію</h2>
+      <h2 class="card-title"> Вибрати слот та надіслати запит</h2>
     </div>
     <div class="card-body">
-      <form method="post" action="{% url 'searching:send_request' first_available_slot.id %}">
+      <form method="post" action="{% url 'searching:send_request' 0 %}" id="slot-request-form">
         {% csrf_token %}
+        <div class="form-group">
+          <label for="slot_id">Вибрати слот *</label>
+          <select name="slot_id" id="slot_id" required>
+            <option value="">-- Оберіть слот --</option>
+            {% for slot in available_slots %}
+            <option value="{{ slot.id }}">Слот #{{ slot.id }}{% if slot.topic %} — {{ slot.topic }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <small class="text-muted">Якщо тема вказана — вона показана поруч зі слотом.</small>
+        </div>
+
         <div class="form-group">
           <label for="message">Повідомлення викладачу (опціонально)</label>
           <textarea name="message" id="message" rows="4"
-            placeholder="Розкажіть коротко про тему вашої роботи та чому обрали цього викладача..."></textarea>
+            placeholder="Розкажіть коротко про вашу мотивацію та чому обрали цього викладача..."></textarea>
           <span class="form-help">Повідомлення допоможе викладачу краще зрозуміти вашу мотивацію</span>
         </div>
         <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-           Надіслати запит
+           Надіслати запит на слот
         </button>
       </form>
     </div>

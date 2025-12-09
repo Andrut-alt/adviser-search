@@ -24,8 +24,18 @@
         <span style="color: var(--color-success);">●</span> Вільний
         {% endif %}
       </p>
+      {% if slot.topic %}
+      <p><strong>Тема курсової:</strong> {{ slot.topic }}</p>
+      {% else %}
+      <p class="text-muted"><strong>Тема курсової:</strong> <em>Не встановлена</em></p>
+      {% endif %}
       <p><strong>Створено:</strong> {{ slot.created_at|date:"d.m.Y H:i" }}</p>
     </div>
+    {% if not slot.is_filled %}
+    <div class="card-footer">
+      <a href="{% url 'searching:edit_slot' slot.id %}" class="btn btn-primary btn-sm">Редагувати тему</a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Assigned Student (if exists) -->
